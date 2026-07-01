@@ -1,18 +1,20 @@
-const express = require('express');
+import app from './app'
+import database from './app/connections/mongodb'
 
-const app = express();
 const port = process.env.PORT || 8080;
+const prepareComponentsForStart = () => Promise.all([database.connect()])
+const cleanupComponentsForShutdown = () => Promise.all([database.disconnect()])
 
-app.use(express.json());
+const startServer = async () => {
+  try {
+    const server = app.listen(port)
 
-app.get('/', (req, res) => {
-    res.json({ message: 'Hello World!' });
-});
+    await prepareComponentsForStart()
+    console.log(`Server is running at port: ${port}`)
+  } catch (error) {
+    cleanupComponentsForShutdown()
+    console.log(`Error: ${error.message}`)
+  }
+}
 
-app.get('/api/hello', (req, res) => {
-    res.json({ message: 'Hello World from API!' });
-});
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+startServer()
