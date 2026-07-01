@@ -8,7 +8,11 @@ const createUser = async (req, res) => {
       const newRecord = await userService.createUser({ name, avatar })
       return res.status(201).json({
         status: 'OK',
-        data: newRecord,
+        data: {
+          id: newRecord?._id,
+          name: newRecord?.name,
+          avatar: newRecord?.avatar,
+        },
       })
     } else {
       return res.status(400).json({
