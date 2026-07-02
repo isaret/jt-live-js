@@ -10,5 +10,6 @@ router.get('/', (req, res) => {
 router.get('/user', controllers.user.getUsers)
 router.put('/user', controllers.user.createUser)
 router.put('/room', authenticateToken, controllers.liveRoom.createLiveRoom)
+router.get('/room', authenticateToken, controllers.liveRoom.getLiveRoom)
 
 export default router

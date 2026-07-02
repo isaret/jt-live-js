@@ -55,6 +55,37 @@ const createLiveRoom = async (req, res) => {
   }
 }
 
+
+const getLiveRoom = async (req, res) => {
+  try {
+    const { user } = req
+    const userId = user?.flexID?.id
+    if (userId) {
+      const result = await liveRoomsService.getLiveRoomsWithUserId(userId)
+      return res.status(200).json(result.map((row) => ({
+        'id': row['_id'],
+        'title': row['title'],
+        'scheduledStartAt': row['scheduledStartAt'],
+        'scheduledEndAt': row['scheduledEndAt'],
+        'participants': row['participants'].map((p) => ({
+          'id': p['userId'],
+          'role': p['role'],
+          'queueNo': p['queueNo'],
+        }))
+      })))
+    } else {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: "Bad Request",
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ code: 500, message: 'Internal server error' })
+  }
+}
+
 export default {
   createLiveRoom,
+  getLiveRoom,
 }
