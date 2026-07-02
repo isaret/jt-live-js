@@ -1,5 +1,6 @@
 import express from 'express'
 import controllers from './controllers'
+import authenticateToken from './middleware/authMiddleware'
 
 const router = express.Router()
 
@@ -8,5 +9,6 @@ router.get('/', (req, res) => {
 })
 router.get('/user', controllers.user.getUsers)
 router.put('/user', controllers.user.createUser)
+router.put('/room', authenticateToken, controllers.liveRoom.createLiveRoom)
 
 export default router

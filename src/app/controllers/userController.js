@@ -38,7 +38,12 @@ const createUser = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    const users = await userService.getAllUsers()
+    let filter = {}
+    const { name } = req.query
+    if (name?.trim()?.length > 0) {
+      filter = { name: { $regex: name, $options: 'i' } }
+    }
+    const users = await userService.getAllUsers(filter)
     return res.status(200).json(users.map((row) => ({
       id: row?._id,
       name: row?.name,
