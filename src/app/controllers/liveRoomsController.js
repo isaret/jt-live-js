@@ -65,6 +65,8 @@ const getLiveRoom = async (req, res) => {
       return res.status(200).json(result.map((row) => ({
         'id': row['_id'],
         'title': row['title'],
+        'status': row['status'],
+        'createdAt': row['createdAt'],
         'scheduledStartAt': row['scheduledStartAt'],
         'scheduledEndAt': row['scheduledEndAt'],
         'participants': row['participants'].map((p) => ({
