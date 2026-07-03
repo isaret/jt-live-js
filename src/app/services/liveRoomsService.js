@@ -7,5 +7,6 @@ const getLiveRoomWithRoomId = (roomId) => liveRoomsModel.findWithRoomId(roomId)
 export default {
   createLiveRoom,
   getAllLiveRooms,
+  getLiveRoomsWithUserId,
   getLiveRoomWithRoomId,
 }
