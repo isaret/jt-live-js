@@ -11,5 +11,6 @@ router.get('/user', controllers.user.getUsers)
 router.put('/user', controllers.user.createUser)
 router.put('/room', authenticateToken, controllers.liveRoom.createLiveRoom)
 router.get('/room', authenticateToken, controllers.liveRoom.getLiveRoom)
+router.get('/room/:roomId', authenticateToken, controllers.liveRoom.getLiveRoomWithRoomId)
 
 export default router

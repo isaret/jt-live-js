@@ -1,3 +1,4 @@
+import { json } from 'express'
 import liveRoomsService from '../services/liveRoomsService'
 import roomParticipantsService from '../services/roomParticipantsService'
 
@@ -46,7 +47,7 @@ const createLiveRoom = async (req, res) => {
     } else {
       return res.status(400).json({
         code: 'Bad_Request',
-        message: "Bad Request",
+        message: 'Bad Request',
       })
     }
   } catch (err) {
@@ -54,7 +55,6 @@ const createLiveRoom = async (req, res) => {
     return res.status(500).json({ code: 500, message: 'Internal server error' })
   }
 }
-
 
 const getLiveRoom = async (req, res) => {
   try {
@@ -78,7 +78,56 @@ const getLiveRoom = async (req, res) => {
     } else {
       return res.status(400).json({
         code: 'Bad_Request',
-        message: "Bad Request",
+        message: 'Bad Request',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ code: 500, message: 'Internal server error' })
+  }
+}
+
+
+const getLiveRoomWithRoomId = async (req, res) => {
+  try {
+    const { user, params } = req
+    const { roomId } = params
+    const userId = user?.flexID?.id
+    if (userId && roomId) {
+      const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
+      if (result?.length > 0) {
+        const room = result[0]
+        const participants = room.participants;
+        const index = participants.findIndex((row) => row.userId == userId)
+        if (index !== -1) {
+          return res.status(200).json({
+            ...room,
+            'participants': room['participants'].map((p) => ({
+              'id': p['userId'],
+              'role': p['role'],
+              'queueNo': p['queueNo'],
+              'status': p['status'],
+              'invitedBy': p['invitedBy'],
+              'acceptedAt': p['acceptedAt'],
+              'joinedAt': p['joinedAt'],
+              'leftAt': p['leftAt'],
+            })).sort((a, b) => a.queueNo - b.queueNo)
+          })
+        } else {
+          return res.status(401).json({
+            code: 'Unauthorized',
+            message: 'Unauthorized',
+          })
+        }
+      }
+      return res.status(404).json({
+        code: 'Not_Found',
+        message: 'Not Found',
+      })
+    } else {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: 'Bad Request',
       })
     }
   } catch (err) {
@@ -90,4 +139,5 @@ const getLiveRoom = async (req, res) => {
 export default {
   createLiveRoom,
   getLiveRoom,
+  getLiveRoomWithRoomId,
 }

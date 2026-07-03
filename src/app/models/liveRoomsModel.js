@@ -33,9 +33,51 @@ const findAllWithUserId = (userId) => model.aggregate([
     }
   }
 ])
+
+const findWithRoomId = (roomId) => model.aggregate([
+  {
+    $match: {
+      _id: new mongoose.Types.ObjectId(roomId)
+    }
+  },
+  {
+    $lookup: {
+      from: 'room_participants',
+      localField: '_id',
+      foreignField: 'roomId',
+      as: 'participants'
+    }
+  },
+  {
+    $unwind: {
+      path: '$participants',
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $group: {
+      _id: '$_id',
+      room: { $first: '$$ROOT' },
+      participants: { $push: '$participants' }
+    }
+  },
+  {
+    $replaceRoot: {
+      newRoot: {
+        $mergeObjects: [
+          '$room',
+          {
+            participants: '$participants'
+          }
+        ]
+      }
+    }
+  }
+])
 export default {
   findOne,
   findAll,
   create,
   findAllWithUserId,
+  findWithRoomId,
 }
