@@ -39,8 +39,8 @@ const createLiveRoom = async (req, res) => {
       return res.status(201).json({
         status: 'OK',
         data: {
-          room,
-          participants: createdParticipants,
+          id: roomId,
+          createdAt: room['createdAt'],
         },
       })
     } else {
