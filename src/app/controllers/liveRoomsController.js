@@ -101,7 +101,18 @@ const getLiveRoomWithRoomId = async (req, res) => {
         const index = participants.findIndex((row) => row.userId == userId)
         if (index !== -1) {
           return res.status(200).json({
-            ...room,
+            'id': room['_id'],
+            'title': room['title'],
+            'status': room['status'],
+            'scheduledStartAt': room['scheduledStartAt'],
+            'scheduledEndAt': room['scheduledEndAt'],
+            'actualStartAt': room['actualStartAt'],
+            'actualEndAt': room['actualEndAt'],
+            'createdBy': room['createdBy'],
+            'hostId': room['hostId'],
+            'currentGuestId': room['currentGuestId'],
+            'createdAt': room['createdAt'],
+            'updatedAt': room['updatedAt'],
             'participants': room['participants'].map((p) => ({
               'id': p['userId'],
               'role': p['role'],
