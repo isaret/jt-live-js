@@ -26,6 +26,11 @@ const findAllWithUserId = (userId) => model.aggregate([
         }
       }
     }
+  },
+  {
+    $sort: {
+      createdAt: -1
+    }
   }
 ])
 export default {
