@@ -66,6 +66,7 @@ const getLiveRoom = async (req, res) => {
         'id': row['_id'],
         'title': row['title'],
         'status': row['status'],
+        'hostId': row['hostId'],
         'createdAt': row['createdAt'],
         'scheduledStartAt': row['scheduledStartAt'],
         'scheduledEndAt': row['scheduledEndAt'],
