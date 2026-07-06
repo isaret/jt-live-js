@@ -106,7 +106,7 @@ const getLiveRoomWithRoomId = async (req, res) => {
           return res.status(200).json({
             'id': room['_id'],
             'title': room['title'],
-            'description': row['description'],
+            'description': room['description'],
             'status': room['status'],
             'scheduledStartAt': room['scheduledStartAt'],
             'scheduledEndAt': room['scheduledEndAt'],
