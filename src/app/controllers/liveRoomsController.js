@@ -5,7 +5,7 @@ import roomParticipantsService from '../services/roomParticipantsService'
 const createLiveRoom = async (req, res) => {
   try {
     const { user } = req
-    const { title, scheduledStartAt, scheduledEndAt, participants } = req.body || {}
+    const { title, scheduledStartAt, scheduledEndAt, participants, description } = req.body || {}
     const createdBy = user?.flexID?.id
     if (createdBy && title && scheduledStartAt && scheduledEndAt && participants) {
       const data = {
@@ -14,7 +14,8 @@ const createLiveRoom = async (req, res) => {
         scheduledEndAt,
         createdBy: createdBy,
         hostId: createdBy,
-        status: 'scheduled'
+        status: 'scheduled',
+        description: description,
       }
       const room = await liveRoomsService.createLiveRoom(data)
       const roomId = room['_id']
@@ -65,6 +66,7 @@ const getLiveRoom = async (req, res) => {
       return res.status(200).json(result.map((row) => ({
         'id': row['_id'],
         'title': row['title'],
+        'description': row['description'],
         'status': row['status'],
         'hostId': row['hostId'],
         'createdAt': row['createdAt'],
@@ -104,6 +106,7 @@ const getLiveRoomWithRoomId = async (req, res) => {
           return res.status(200).json({
             'id': room['_id'],
             'title': room['title'],
+            'description': row['description'],
             'status': room['status'],
             'scheduledStartAt': room['scheduledStartAt'],
             'scheduledEndAt': room['scheduledEndAt'],
