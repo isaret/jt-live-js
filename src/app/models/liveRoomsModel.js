@@ -9,6 +9,8 @@ const model = mongoose.model('rooms', liveRoomSchema)
 const findOne = (filter = {}) => model.findOne(filter).lean().exec()
 const findAll = (filter = {}) => model.find(filter).lean().exec()
 const create = (record) => model.create(record)
+const update = (roomId, record) => model.updateOne({ _id: roomId }, record)
+const deleteOne = (filter) => model.deleteOne(filter).exec()
 const findAllWithUserId = (userId) => model.aggregate([
   {
     $lookup: {
@@ -80,4 +82,6 @@ export default {
   create,
   findAllWithUserId,
   findWithRoomId,
+  update,
+  deleteOne,
 }
