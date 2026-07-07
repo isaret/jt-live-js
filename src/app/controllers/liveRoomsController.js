@@ -313,6 +313,68 @@ const setLiveRoomStatus = async (req, res) => {
   }
 }
 
+const setParticipantStatus = async (req, res) => {
+  try {
+    const { user, params } = req
+    const { roomId, participantUserId } = params
+    const { status } = req.body
+    const userId = user?.flexID?.id
+    
+    const validStatuses = ['invited', 'accepted', 'declined', 'waiting', 'live', 'left', 'removed']
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: 'Invalid status',
+      })
+    }
+    
+    if (userId && roomId && participantUserId) {
+      const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
+      if (result?.length > 0) {
+        const room = result[0]
+        
+        // Check permissions: only host or the participant themselves can update the status
+        if (room.hostId == userId || room.createdBy == userId || participantUserId == userId) {
+          
+          const data = { status }
+          
+          if (status === 'accepted') {
+            data.acceptedAt = new Date()
+          } else if (status === 'live') {
+            data.joinedAt = new Date()
+          } else if (status === 'left' || status === 'removed') {
+            data.leftAt = new Date()
+          }
+          
+          await roomParticipantsService.updateParticipants({ roomId, userId: participantUserId }, data)
+          
+          return res.status(200).json({
+            status: 'OK',
+            message: 'Participant status updated successfully',
+          })
+        } else {
+          return res.status(403).json({
+            code: 'Forbidden',
+            message: 'Only the host or the participant can update this status',
+          })
+        }
+      }
+      return res.status(404).json({
+        code: 'Not_Found',
+        message: 'Room not found',
+      })
+    } else {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: 'Bad Request',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ code: 500, message: 'Internal server error' })
+  }
+}
+
 export default {
   createLiveRoom,
   getLiveRoom,
@@ -320,4 +382,5 @@ export default {
   updateLiveRoom,
   deleteLiveRoom,
   setLiveRoomStatus,
+  setParticipantStatus,
 }
