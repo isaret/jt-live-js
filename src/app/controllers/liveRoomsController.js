@@ -37,7 +37,7 @@ const createLiveRoom = async (req, res) => {
           userId: row,
         })
       })
-      const createdParticipants = await roomParticipantsService.insertParticipants(roomParticipants)
+      await roomParticipantsService.insertParticipants(roomParticipants)
       return res.status(201).json({
         status: 'OK',
         data: {
@@ -157,33 +157,33 @@ const updateLiveRoom = async (req, res) => {
     const { roomId } = params
     const { title, scheduledStartAt, scheduledEndAt, participants, description } = req.body || {}
     const userId = user?.flexID?.id
-    
+
     if (userId && roomId) {
       const data = {}
       if (title) data.title = title
       if (scheduledStartAt) data.scheduledStartAt = scheduledStartAt
       if (scheduledEndAt) data.scheduledEndAt = scheduledEndAt
       if (description !== undefined) data.description = description
-      
+
       await liveRoomsService.updateLiveRoom(roomId, data)
-      
+
       if (participants && Array.isArray(participants)) {
         // Fetch current guests
         const currentParticipants = await roomParticipantsService.getAllParticipants({ roomId: roomId, role: 'guest' })
         const currentGuestIds = currentParticipants.map(p => p.userId.toString())
-        
+
         // Find which to remove
         const toRemove = currentGuestIds.filter(id => !participants.includes(id))
         if (toRemove.length > 0) {
           await roomParticipantsService.deleteParticipants({ roomId: roomId, role: 'guest', userId: { $in: toRemove } })
         }
-        
+
         // Find which to add
         const toAdd = participants.filter(id => !currentGuestIds.includes(id))
         if (toAdd.length > 0) {
           const allParticipants = await roomParticipantsService.getAllParticipants({ roomId: roomId })
           let maxQueueNo = allParticipants.reduce((max, p) => p.queueNo > max ? p.queueNo : max, 0)
-          
+
           const newParticipants = toAdd.map(id => {
             maxQueueNo += 1
             return {
@@ -196,7 +196,7 @@ const updateLiveRoom = async (req, res) => {
           await roomParticipantsService.insertParticipants(newParticipants)
         }
       }
-      
+
       return res.status(200).json({
         status: 'OK',
         message: 'Room updated successfully',
@@ -218,7 +218,7 @@ const deleteLiveRoom = async (req, res) => {
     const { user, params } = req
     const { roomId } = params
     const userId = user?.flexID?.id
-    
+
     if (userId && roomId) {
       const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
       if (result?.length > 0) {
@@ -228,7 +228,7 @@ const deleteLiveRoom = async (req, res) => {
           await liveRoomsService.deleteLiveRoom(roomId)
           // Delete participants
           await roomParticipantsService.deleteParticipants({ roomId: roomId })
-          
+
           return res.status(200).json({
             status: 'OK',
             message: 'Room deleted successfully',
@@ -256,10 +256,68 @@ const deleteLiveRoom = async (req, res) => {
   }
 }
 
+const setLiveRoomStatus = async (req, res) => {
+  try {
+    const { user, params } = req
+    const { roomId } = params
+    const { status } = req.body
+    const userId = user?.flexID?.id
+    
+    const validStatuses = ['draft', 'scheduled', 'preparing', 'live', 'ended', 'cancelled']
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: 'Invalid status',
+      })
+    }
+    
+    if (userId && roomId) {
+      const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
+      if (result?.length > 0) {
+        const room = result[0]
+        if (room.hostId == userId || room.createdBy == userId) {
+          const data = { status }
+          
+          if (status === 'live' && !room.actualStartAt) {
+            data.actualStartAt = new Date()
+          } else if ((status === 'ended' || status === 'cancelled') && !room.actualEndAt) {
+            data.actualEndAt = new Date()
+          }
+          
+          await liveRoomsService.updateLiveRoom(roomId, data)
+          
+          return res.status(200).json({
+            status: 'OK',
+            message: 'Room status updated successfully',
+          })
+        } else {
+          return res.status(403).json({
+            code: 'Forbidden',
+            message: 'Only the host can update the room status',
+          })
+        }
+      }
+      return res.status(404).json({
+        code: 'Not_Found',
+        message: 'Room not found',
+      })
+    } else {
+      return res.status(400).json({
+        code: 'Bad_Request',
+        message: 'Bad Request',
+      })
+    }
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ code: 500, message: 'Internal server error' })
+  }
+}
+
 export default {
   createLiveRoom,
   getLiveRoom,
   getLiveRoomWithRoomId,
   updateLiveRoom,
   deleteLiveRoom,
+  setLiveRoomStatus,
 }
