@@ -1,6 +1,7 @@
 import { json } from 'express'
 import liveRoomsService from '../services/liveRoomsService'
 import roomParticipantsService from '../services/roomParticipantsService'
+import { sendPushNotification } from '../libs/pushNotification'
 
 const createLiveRoom = async (req, res) => {
   try {
@@ -38,6 +39,15 @@ const createLiveRoom = async (req, res) => {
         })
       })
       await roomParticipantsService.insertParticipants(roomParticipants)
+
+      if (participants && participants.length > 0) {
+        sendPushNotification(
+          participants,
+          `คุณได้รับเชิญเข้าร่วมห้อง ${title}`,
+          { roomId: roomId.toString() }
+        ).catch(err => console.error('Push notification error:', err.message))
+      }
+
       return res.status(201).json({
         status: 'OK',
         data: {
@@ -262,7 +272,7 @@ const setLiveRoomStatus = async (req, res) => {
     const { roomId } = params
     const { status } = req.body
     const userId = user?.flexID?.id
-    
+
     const validStatuses = ['draft', 'scheduled', 'preparing', 'live', 'ended', 'cancelled']
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
@@ -270,22 +280,22 @@ const setLiveRoomStatus = async (req, res) => {
         message: 'Invalid status',
       })
     }
-    
+
     if (userId && roomId) {
       const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
       if (result?.length > 0) {
         const room = result[0]
         if (room.hostId == userId || room.createdBy == userId) {
           const data = { status }
-          
+
           if (status === 'live' && !room.actualStartAt) {
             data.actualStartAt = new Date()
           } else if ((status === 'ended' || status === 'cancelled') && !room.actualEndAt) {
             data.actualEndAt = new Date()
           }
-          
+
           await liveRoomsService.updateLiveRoom(roomId, data)
-          
+
           return res.status(200).json({
             status: 'OK',
             message: 'Room status updated successfully',
@@ -313,13 +323,34 @@ const setLiveRoomStatus = async (req, res) => {
   }
 }
 
+const sendPushNotificationParticipantStatus = async (hostId, status, displayName, roomName, roomId) => {
+  try {
+    let message = ''
+    switch (status) {
+      case 'accepted':
+        message = `${displayName} ตอบรับคำเชิญเข้าร่วมไลฟ์ ${roomName}`
+        break
+      case 'declined':
+        message = `${displayName} ปฏิเสธคำเชิญเข้าร่วมไลฟ์ ${roomName}`
+        break
+    }
+    sendPushNotification(
+      [hostId],
+      message,
+      { roomId: roomId.toString(), status }
+    )
+  } catch (err) {
+    console.error('Push notification error:', err.message)
+  }
+}
+
 const setParticipantStatus = async (req, res) => {
   try {
     const { user, params } = req
     const { roomId, participantUserId } = params
-    const { status } = req.body
+    const { status, displayName } = req.body
     const userId = user?.flexID?.id
-    
+
     const validStatuses = ['invited', 'accepted', 'declined', 'waiting', 'live', 'left', 'removed']
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
@@ -327,17 +358,17 @@ const setParticipantStatus = async (req, res) => {
         message: 'Invalid status',
       })
     }
-    
+
     if (userId && roomId && participantUserId) {
       const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
       if (result?.length > 0) {
         const room = result[0]
-        
+
         // Check permissions: only host or the participant themselves can update the status
         if (room.hostId == userId || room.createdBy == userId || participantUserId == userId) {
-          
+
           const data = { status }
-          
+
           if (status === 'accepted') {
             data.acceptedAt = new Date()
           } else if (status === 'live') {
@@ -345,9 +376,13 @@ const setParticipantStatus = async (req, res) => {
           } else if (status === 'left' || status === 'removed') {
             data.leftAt = new Date()
           }
-          
+
           await roomParticipantsService.updateParticipants({ roomId, userId: participantUserId }, data)
-          
+
+          if (room.hostId) {
+            sendPushNotificationParticipantStatus(room.hostId, status, displayName, room.title, roomId)
+          }
+
           return res.status(200).json({
             status: 'OK',
             message: 'Participant status updated successfully',
