@@ -22,7 +22,7 @@ export const sendPushNotification = async (userIds, message, data) => {
     const response = await axios.post(ONESIGNAL_API_URL, payload, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        Authorization: `Key ${ONESIGNAL_REST_API_KEY}`,
+        'Authorization': `Key ${ONESIGNAL_REST_API_KEY}`,
       },
     })
 
