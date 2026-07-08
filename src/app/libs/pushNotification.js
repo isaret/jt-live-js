@@ -1,11 +1,11 @@
 import axios from 'axios'
 
-const ONESIGNAL_API_URL = 'https://onesignal.com/api/v1/notifications'
+const ONESIGNAL_API_URL = 'https://api.onesignal.com/notifications?c=push'
 
 export const sendPushNotification = async (userIds, message, data) => {
   try {
-    const ONESIGNAL_APP_ID = '4a16678d-12f5-4bfb-ad24-d51b44d69b4f'
-    const ONESIGNAL_REST_API_KEY = 'os_v2_app_jilgpdis6vf7xlje2unujvu3j7rljv7y7eguqqu4tyrbnka6slzdeqlw7znps4cl2tnw6hrbdqee32qjbb6cja5zuzzh2o2emkzbnsq'
+    const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID
+    const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY
 
     const payload = {
       app_id: ONESIGNAL_APP_ID,
@@ -18,7 +18,6 @@ export const sendPushNotification = async (userIds, message, data) => {
       },
       'custom_data': data,
     }
-
     const response = await axios.post(ONESIGNAL_API_URL, payload, {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
