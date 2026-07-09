@@ -16,7 +16,7 @@ export const sendPushNotification = async (userIds, message, data) => {
       'contents': {
         'en': message,
       },
-      'custom_data': data,
+      'data': data,
     }
     const response = await axios.post(ONESIGNAL_API_URL, payload, {
       headers: {
