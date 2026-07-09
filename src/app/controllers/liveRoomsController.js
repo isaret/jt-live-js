@@ -204,6 +204,11 @@ const updateLiveRoom = async (req, res) => {
             }
           })
           await roomParticipantsService.insertParticipants(newParticipants)
+          sendPushNotification(
+            toAdd,
+            `คุณได้รับเชิญเข้าร่วมห้อง ${title}`,
+            { roomId: roomId.toString() }
+          ).catch(err => console.error('Push notification error:', err.message))
         }
       }
 
