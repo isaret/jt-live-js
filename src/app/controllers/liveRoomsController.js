@@ -1,4 +1,3 @@
-import { json } from 'express'
 import liveRoomsService from '../services/liveRoomsService'
 import roomParticipantsService from '../services/roomParticipantsService'
 import { sendPushNotification } from '../libs/pushNotification'

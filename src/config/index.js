@@ -7,4 +7,10 @@ export const databaseConfigs = {
   reconnectLimit: parseInt(process.env.DB_RECONNECT_LIMIT, 10) || 5,
 }
 
+export const liveConfigs = {
+  apiKey: process.env.LIVEKIT_API_KEY,
+  apiSecret: process.env.LIVEKIT_API_SECRET,
+}
+
+
 export const URL_PREFIX = '/api/v1'
