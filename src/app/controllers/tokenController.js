@@ -1,5 +1,6 @@
 import tokenService from '../services/tokenService'
 import roomParticipantsService from '../services/roomParticipantsService'
+import { liveConfigs } from '../../config'
 
 const createToken = async (req, res) => {
   const { user, params } = req
@@ -27,7 +28,7 @@ const createToken = async (req, res) => {
       roomName: roomId,
       participantName: userName,
     })
-    return res.status(201).json({ token })
+    return res.status(201).json({ token, host: liveConfigs.host })
   } catch (err) {
     console.log(err)
     return res.status(500).json({ code: 500, message: 'Internal server error' })
