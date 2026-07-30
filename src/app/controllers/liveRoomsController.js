@@ -341,6 +341,7 @@ const sendPushNotificationParticipantStatus = async (hostId, status, displayName
         message = `${displayName} เริ่มไลฟ์ ${roomName} แล้ว`
         break
     }
+    console.log(`push notification:[${hostId}][${roomId}][${status}] ${message}`)
     sendPushNotification(
       [hostId],
       message,
