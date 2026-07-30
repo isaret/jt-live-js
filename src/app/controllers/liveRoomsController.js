@@ -302,8 +302,10 @@ const setLiveRoomStatus = async (req, res) => {
 
           const participants = room.participants.map((row) => row.userId).filter((row) => row !== userId);
           console.log(participants)
+          console.log(`push notification : ${status} ${displayName} เริ่มไลฟ์${room.title} แล้ว`)
           if (status === 'live') {
-            if (participants && participants.length > 0) {
+            console.log(`push notification : ${displayName} เริ่มไลฟ์${room.title} แล้ว`)
+            if (participants.length > 0) {
               sendPushNotification(
                 participants,
                 `${displayName} เริ่มไลฟ์${room.title} แล้ว`,
