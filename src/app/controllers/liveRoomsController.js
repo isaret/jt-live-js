@@ -274,7 +274,7 @@ const setLiveRoomStatus = async (req, res) => {
   try {
     const { user, params } = req
     const { roomId } = params
-    const { status } = req.body
+    const { status, displayName } = req.body
     const userId = user?.flexID?.id
 
     const validStatuses = ['draft', 'scheduled', 'preparing', 'live', 'ended', 'cancelled']
@@ -300,13 +300,13 @@ const setLiveRoomStatus = async (req, res) => {
 
           await liveRoomsService.updateLiveRoom(roomId, data)
 
-          const participants = room.participants.map((row) => row.userId).filter((row) => row !== participants);
+          const participants = room.participants.map((row) => row.userId).filter((row) => row !== userId);
           console.log(participants)
           if (status === 'live') {
             if (participants && participants.length > 0) {
               sendPushNotification(
                 participants,
-                `xxx เริ่มไลฟ์ ${room.title} แล้ว`,
+                `${displayName} เริ่มไลฟ์${room.title} แล้ว`,
                 { roomId: roomId.toString() }
               ).catch(err => console.error('Push notification error:', err.message))
             }
