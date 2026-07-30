@@ -337,6 +337,9 @@ const sendPushNotificationParticipantStatus = async (hostId, status, displayName
       case 'declined':
         message = `${displayName} ปฏิเสธคำเชิญเข้าร่วมไลฟ์ ${roomName}`
         break
+      case 'live':
+        message = `${displayName} เริ่มไลฟ์ ${roomName} แล้ว`
+        break
     }
     sendPushNotification(
       [hostId],
