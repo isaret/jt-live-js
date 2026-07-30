@@ -300,6 +300,18 @@ const setLiveRoomStatus = async (req, res) => {
 
           await liveRoomsService.updateLiveRoom(roomId, data)
 
+          const participants = room.participants.map((row) => row.userId).filter((row) => row !== participants);
+          console.log(participants)
+          if (status === 'live') {
+            if (participants && participants.length > 0) {
+              sendPushNotification(
+                participants,
+                `xxx เริ่มไลฟ์ ${room.title} แล้ว`,
+                { roomId: roomId.toString() }
+              ).catch(err => console.error('Push notification error:', err.message))
+            }
+          }
+
           return res.status(200).json({
             status: 'OK',
             message: 'Room status updated successfully',
