@@ -299,16 +299,12 @@ const setLiveRoomStatus = async (req, res) => {
           }
 
           await liveRoomsService.updateLiveRoom(roomId, data)
-
           const participants = room.participants.map((row) => row.userId).filter((row) => row !== userId);
-          console.log(participants)
-          console.log(`push notification : ${status} ${displayName} เริ่มไลฟ์${room.title} แล้ว`)
           if (status === 'live') {
-            console.log(`push notification : ${displayName} เริ่มไลฟ์${room.title} แล้ว`)
             if (participants.length > 0) {
               sendPushNotification(
                 participants,
-                `${displayName} เริ่มไลฟ์${room.title} แล้ว`,
+                `${displayName} เริ่มไลฟ์"${room.title}"แล้ว`,
                 { roomId: roomId.toString() }
               ).catch(err => console.error('Push notification error:', err.message))
             }
