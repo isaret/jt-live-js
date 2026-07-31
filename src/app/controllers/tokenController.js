@@ -7,7 +7,7 @@ const createToken = async (req, res) => {
   const { roomId } = params
   const { userName } = req.body || {}
   try {
-    const userId = user?.flexID?.id
+    const userId = user?.userId
     if (!userId || !roomId || !userName) {
       return res.status(400).json({
         code: 'Bad_Request',

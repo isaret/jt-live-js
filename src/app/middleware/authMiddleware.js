@@ -1,24 +1,24 @@
-const jwt = require("jsonwebtoken")
+import jwt from 'jsonwebtoken'
+import { getUserId } from '../libs/flexid'
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
-
-const authenticateToken = (req, res, next) => {
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization
 
   // Authorization: Bearer xxxxx
   if (!authHeader) {
     return res.status(401).json({
       success: false,
-      message: "Token required",
+      message: 'Token required',
     })
   }
 
-  const token = authHeader.split(" ")[1]
+  const token = authHeader.split(' ')[1]
 
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: "Invalid token format",
+      message: 'Invalid token format',
     })
   }
   /*
@@ -26,7 +26,7 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(401).json({
         success: false,
-        message: "Invalid or expired token",
+        message: 'Invalid or expired token',
       })
     }
     
@@ -35,8 +35,9 @@ const authenticateToken = (req, res, next) => {
     next()
   })
   */
-  const decoded = jwt.decode(token)
-  req.user = decoded
+  const userId = await getUserId(token)
+  //  const decoded = jwt.decode(token)
+  req.user = { userId }
   next()
 }
 

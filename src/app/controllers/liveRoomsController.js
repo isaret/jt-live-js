@@ -6,7 +6,7 @@ const createLiveRoom = async (req, res) => {
   try {
     const { user } = req
     const { title, scheduledStartAt, scheduledEndAt, participants, description } = req.body || {}
-    const createdBy = user?.flexID?.id
+    const createdBy = user?.userId
     if (createdBy && title && scheduledStartAt && scheduledEndAt && participants) {
       const data = {
         title,
@@ -69,7 +69,7 @@ const createLiveRoom = async (req, res) => {
 const getLiveRoom = async (req, res) => {
   try {
     const { user } = req
-    const userId = user?.flexID?.id
+    const userId = user?.userId
     if (userId) {
       const result = await liveRoomsService.getLiveRoomsWithUserId(userId)
       return res.status(200).json(result.map((row) => ({
@@ -104,7 +104,7 @@ const getLiveRoomWithRoomId = async (req, res) => {
   try {
     const { user, params } = req
     const { roomId } = params
-    const userId = user?.flexID?.id
+    const userId = user?.userId
     if (userId && roomId) {
       const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
       if (result?.length > 0) {
@@ -165,7 +165,7 @@ const updateLiveRoom = async (req, res) => {
     const { user, params } = req
     const { roomId } = params
     const { title, scheduledStartAt, scheduledEndAt, participants, description } = req.body || {}
-    const userId = user?.flexID?.id
+    const userId = user?.userId
 
     if (userId && roomId) {
       const data = {}
@@ -231,7 +231,7 @@ const deleteLiveRoom = async (req, res) => {
   try {
     const { user, params } = req
     const { roomId } = params
-    const userId = user?.flexID?.id
+    const userId = user?.userId
 
     if (userId && roomId) {
       const result = await liveRoomsService.getLiveRoomWithRoomId(roomId)
@@ -275,7 +275,7 @@ const setLiveRoomStatus = async (req, res) => {
     const { user, params } = req
     const { roomId } = params
     const { status, displayName } = req.body
-    const userId = user?.flexID?.id
+    const userId = user?.userId
 
     const validStatuses = ['draft', 'scheduled', 'preparing', 'live', 'ended', 'cancelled']
     if (!validStatuses.includes(status)) {
@@ -368,7 +368,7 @@ const setParticipantStatus = async (req, res) => {
     const { user, params } = req
     const { roomId, participantUserId } = params
     const { status, displayName } = req.body
-    const userId = user?.flexID?.id
+    const userId = user?.userId
 
     const validStatuses = ['invited', 'accepted', 'declined', 'waiting', 'live', 'left', 'removed']
     if (!validStatuses.includes(status)) {
