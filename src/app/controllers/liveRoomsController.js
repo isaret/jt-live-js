@@ -42,7 +42,7 @@ const createLiveRoom = async (req, res) => {
       if (participants && participants.length > 0) {
         sendPushNotification(
           participants,
-          `คุณได้รับเชิญเข้าร่วมห้อง ${title}`,
+          `คุณได้รับเชิญเข้าร่วมไลฟ์"${title}"`,
           { roomId: roomId.toString() }
         ).catch(err => console.error('Push notification error:', err.message))
       }
@@ -205,7 +205,7 @@ const updateLiveRoom = async (req, res) => {
           await roomParticipantsService.insertParticipants(newParticipants)
           sendPushNotification(
             toAdd,
-            `คุณได้รับเชิญเข้าร่วมห้อง ${title}`,
+            `คุณได้รับเชิญเข้าร่วมไลฟ์"${title}"`,
             { roomId: roomId.toString() }
           ).catch(err => console.error('Push notification error:', err.message))
         }
@@ -343,13 +343,10 @@ const sendPushNotificationParticipantStatus = async (hostId, status, displayName
     let message = ''
     switch (status) {
       case 'accepted':
-        message = `${displayName} ตอบรับคำเชิญเข้าร่วมไลฟ์ ${roomName}`
+        message = `${displayName} ตอบรับคำเชิญเข้าร่วมไลฟ์"${roomName}"`
         break
       case 'declined':
-        message = `${displayName} ปฏิเสธคำเชิญเข้าร่วมไลฟ์ ${roomName}`
-        break
-      case 'live':
-        message = `${displayName} เริ่มไลฟ์ ${roomName} แล้ว`
+        message = `${displayName} ปฏิเสธคำเชิญเข้าร่วมไลฟ์"${roomName}"`
         break
     }
     console.log(`push notification:[${hostId}][${roomId}][${status}] ${message}`)
